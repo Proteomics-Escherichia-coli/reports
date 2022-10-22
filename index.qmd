@@ -1,0 +1,17 @@
+---
+title: "Project reports"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+toc: true
+number-sections: true
+format:
+  html:
+    html-math-method: katex
+    self-contained: true
+execute:
+  warning: false
+---
+
+This page contains the following reports:
+
+  - [Processing](processing/processing_steps.html)
+  - [Differential expression analysis](downstream_analysis/differential expression.html)

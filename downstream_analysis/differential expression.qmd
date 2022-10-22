@@ -1,0 +1,21 @@
+---
+title: "Differential expression analysis"
+author: "André F. B. Menezes"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+toc: true
+number-sections: true
+format:
+  html:
+    html-math-method: katex
+    code-tools: true
+    self-contained: true
+    code-fold: true
+    code-summary: "Show the code"
+execute:
+  warning: false
+---
+
+
+# Introduction {#sec-intro}
+
+In this report we will perform a differential expression analysis. 
