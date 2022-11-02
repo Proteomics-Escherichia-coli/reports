@@ -1,0 +1,250 @@
+---
+title: "Feature selection analysis"
+author: "André F. B. Menezes, Beatrice Tropea, and Cormac Monaghan"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+toc: true
+number-sections: true
+bibliography: references.bib
+format:
+  html:
+    html-math-method: katex
+    code-tools: true
+    self-contained: true
+    code-fold: true
+    code-summary: "Show the code"
+execute:
+  warning: false
+---
+
+```{r setup}
+library(ggplot2)
+library(cowplot)
+theme_set(
+  theme_cowplot() +
+    background_grid() +
+    theme(legend.position = "top")
+)
+```
+
+
+# Introduction {#sec-intro}
+
+This document performs two method of feature selection in order to reduce the
+number of proteins by selecting that ones with high biological variability.
+The first method is based on the decomposition of variance into technical and
+biological by nonparametric modeling the variance intensity as a function of
+mean intensity. The latter uses the Hedges'G effect size statistics.
+
+All the analysis considers the processed $\log_2$ intensity matrix performed
+in the processing steps described [here](processing/processing_steps.html).
+
+```{r import-data, include=FALSE}
+fts <- readRDS("../data/fts_processed.rds")
+```
+
+
+# Modeling mean-variance relationship {#sec-mean_variance}
+
+This approach fits a locally-weighted regression (LOWESS) between the
+mean-variance relationship of the $\log_2$ normalized intensity for all
+proteins, then subtract the variance of each proteins by their corresponding
+fitted values, the remaining values are called biological variability.
+The `modelGeneVar` function from `scran` package [@Aaron2016] is used.
+
+
+```{r model-protein-var}
+dec <- scran::modelGeneVar(x = fts[["proteins"]],
+                           assay.type = "log2_normalized",
+                           parametric = FALSE)
+
+dec[order(dec$bio, decreasing = TRUE), ]
+```
+
+@fig-mean_var shows the mean-variance relationship with the fitted trend curve 
+in blue. We observe two extreme points greater (lower) than 29 (22).
+
+```{r visualizing}
+#| fig-width: 8
+#| label: fig-mean_var
+#| fig-cap: Relationship between the mean-variance of the $\log_2$ intensity. Each point is a protein and the blue curve is the fitted model.
+plot_mean_variance <- function(dec) {
+  ggplot(dplyr::as_tibble(dec), aes(x = mean, y = total)) +
+    geom_point(size = 2, alpha = 0.5) +
+    geom_line(aes(y = tech), size = 1.5, col = "blue") +
+    scale_x_continuous(breaks = scales::pretty_breaks(8)) +
+    scale_y_continuous(breaks = scales::pretty_breaks(8)) +
+    labs(x = "Mean of the log(intensity) normalized",
+         y = "Variance of the log(intensity) normalized")
+}
+plot_mean_variance(dec = dec)
+```
+
+These two extreme proteins are listed below. Their , which
+could impact the fitted curve. Therefore, we will remove these cases from the
+analysis.
+
+```{r remove-extreme-cases}
+chosen <- ((dec$mean < 22) | (dec$mean > 29))
+to_remove <- rownames(dec)[chosen]
+to_remove
+rowData(fts[["proteins"]][to_remove, ])
+assay(fts[["proteins"]][to_remove, ], "intensity")
+assay(fts[["proteins"]][to_remove, ], "log2_normalized")
+```
+
+After removing the extreme cases we re-fit the mean-variance trend curve,
+the results are shown in @fig-mean_var_refitted. 
+Note that 49,63% of the 
+
+```{r refitting}
+#| fig-width: 8
+#| label: fig-mean_var_refitted
+#| fig-cap: Relationship between the mean-variance of the $\log_2$ intensity after removing some proteins. Each point is a protein and the blue curve is the fitted model.
+# Removing the two proteins with lower (greater) mean (m < 22 and m > 29) 
+chosen <- !(rownames(fts[["proteins"]]) %in% to_remove)
+fts[["proteins"]] <- fts[["proteins"]][chosen, ]
+
+dec_2 <- scran::modelGeneVar(x = fts[["proteins"]],
+                             assay.type = "log2_normalized",
+                             parametric = FALSE)
+dec_2[order(dec_2$bio, decreasing = TRUE), ]
+table(dec_2$bio > 0)
+plot_mean_variance(dec = dec_2)
+
+# Concatenate the decomposition into SE object
+if (all.equal(rownames(fts[["proteins"]]), rownames(dec_2)))
+  rowData(fts[["proteins"]]) <- cbind(rowData(fts[["proteins"]]), dec_2)
+```
+
+```{r}
+#| fig-width: 8
+#| label: fig-ecdf-bio-var
+#| fig-cap: Empirical cumulative distribution of the estimated biological variability.
+ggplot(dplyr::as_tibble(dec_2), aes(x = bio)) +
+  # geom_density(alpha = 0.4, fill = "grey68") +
+  # geom_vline(xintercept = 0, col = "red") +
+  stat_ecdf() +
+  geom_point(data = data.frame(x = 0, y = mean(dec_2$bio > 0)),
+             aes(x = x, y = y), col = "red", size = 4) +
+  geom_rug() +
+  labs(x = "Estimated biological variability", y = "Density") +
+  scale_x_continuous(breaks = scales::pretty_breaks(8))
+```
+
+
+# Effect size statistics {#sec-effect_size}
+
+For each comparison (Control vs Treatment) we can see which proteins are
+up-down regulated in the control and remove them from the treatment because
+it means that their expression are regulated by physiological gene expression.
+We use the Hedges' effect size statistic to do that. The statistics is defined
+as follows
+
+```{r effect-size}
+ampicillin <- apply(
+  assay(fts[["proteins"]], i = "log2_normalized"), 1,
+  function(z)  effectsize::hedges_g(z[1:3], z[10:12])$Hedges_g)
+
+cefotaxime <- apply(
+  assay(fts[["proteins"]], i = "log2_normalized"), 1,
+  function(x) effectsize::hedges_g(x[4:6], x[10:12])$Hedges_g)
+
+ciprofloxacin <- apply(
+  assay(fts[["proteins"]], i = "log2_normalized"), 1,
+  function(x) effectsize::hedges_g(x[7:9], x[10:12])$Hedges_g)
+
+impipenem <- apply(
+  assay(fts[["proteins"]], i = "log2_normalized"), 1,
+  function(x) effectsize::hedges_g(x[13:15], x[10:12])$Hedges_g)
+
+# Organize the results in a data frame
+effect_sizes <- data.frame(ampicillin, cefotaxime, ciprofloxacin, impipenem)
+colnames(effect_sizes) <- paste0("hedges_g__", colnames(effect_sizes))
+head(effect_sizes)
+
+# Concatenating
+if (all.equal(rownames(fts[["proteins"]]), rownames(effect_sizes)))
+  rowData(fts[["proteins"]]) <- cbind(rowData(fts[["proteins"]]), effect_sizes)
+```
+
+@fig-densities_hedges_g shows the density of the absolute value of Hedges'G
+statistics according to the treatment. 
+
+```{r densities-hedges-g}
+#| fig-width: 8
+#| label: fig-densities_hedges_g
+#| fig-cap: Density of the absolute value of Hedges'G statistics compared with the control for each protein and according to the treatment.
+pivotted_ef <- effect_sizes |>
+  dplyr::mutate(protein = rownames(effect_sizes)) |> 
+  tidyr::pivot_longer(cols = -protein, names_to = "hedges_g",
+                      values_to = "value") |> 
+  dplyr::mutate(variable = gsub("hedges_g__", "", hedges_g))
+ggplot(pivotted_ef, aes(x = abs(value))) +
+  facet_wrap(~variable) +
+  geom_density(alpha = 0.4) +
+  geom_rug() +
+  labs(x = "Absolute value of Hedges'G", y = "Density") +
+  scale_x_continuous(breaks = scales::pretty_breaks(8))
+```
+
+After computing the Hedges'G statistic we have to consider a threshold to
+filter the most variability proteins. We will consider 0.5 as the threshold,
+since this value means a moderate effect against the control.
+@fig-densities_hedges_g displays the total of proteins selected by group.
+
+```{r checking}
+#| fig-width: 8
+#| label: fig-total_hedges_g
+#| fig-cap: Total of selected proteins by group. The rule of thumb is the absolute value of Hedges greater than 0.5. 
+
+total_filtered <- pivotted_ef |>
+  dplyr::group_by(variable) |> 
+  dplyr::summarise(n = sum(abs(value) > 0.5),
+                   pct = mean(abs(value) > 0.5),
+                   .groups = "drop")
+ggplot(total_filtered, aes(x = reorder(variable, -n), y = n)) +
+  geom_col() +
+  geom_text(aes(label = paste0(n, " (", round(100 * pct, 2), "%)")),
+            vjust = -0.4) +
+  labs(x = "", y = "") +
+  theme(axis.text.y = element_blank(), axis.title.y = element_blank(),
+        axis.ticks.y = element_blank())
+```
+
+
+
+# Comparison {#sec-comparison}
+
+Finally, we plot in @fig-intersect-plot the intersection of proteins selected
+between the two methods.
+
+```{r intersect-plot}
+#| fig-width: 8
+#| label: fig-intersect-plot
+#| fig-cap: Total of intersect proteins of the feature selection method by group.
+
+chosen_var <- rownames(dec_2)[dec_2$bio > 0]
+list_df <- list()
+j <- 1L
+for (g in unique(pivotted_ef$variable)) {
+  chosen_hedges_g <- pivotted_ef[pivotted_ef$variable == g &
+                                   abs(pivotted_ef$value) > 0.5, ]$protein
+  list_df[[j]] <- data.frame(
+    group = g, n = length(intersect(chosen_var, chosen_hedges_g)))
+  j <- j + 1L
+}
+data_intersect <- do.call(rbind, list_df)
+ggplot(data_intersect, aes(x = reorder(group, -n), y = n)) +
+  geom_col() +
+  geom_text(aes(label = n), vjust = -0.4) +
+  labs(x = "", y = "") +
+  theme(axis.text.y = element_blank(), axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(), panel.grid = element_blank())
+```
+
+
+```{r save-data}
+
+```
+
+
