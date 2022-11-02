@@ -1,6 +1,6 @@
 ---
 title: "Processing label-free MS/MS data"
-author: "André F. B. Menezes"
+author: "André F. B. Menezes, Beatrice Tropea, and Cormac Monaghan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 toc: true
 number-sections: true
@@ -34,13 +34,17 @@ This report describes the processing steps use to organized the
 label-free proteomics of _Escherichia_ _coli_ cultures of bacteria data.
 This data was first analyzed by @Margalit2022.
 
-The report is organized as follows.
+The report is organized as follows. @sec-data describe data import and management
+using QFeatures package. Processing steps, namely filtering, imputation and
+normalization are discussed in @sec-processing.
+Finally, @sec-comparison presents a comparison between the processed data from
+original paper and the steps performed.
 
 # Data import and management {#sec-data}
 
 The data from @Margalit2022 experiment was first pre-processed using
 [MaxQuant](https://www.maxquant.org/) software. MaxQuant provides the 
-evidence.txt file which combines all the informationa about identified peptides
+`evidence.txt` file which combines all the information about identified peptides
 and is the only file required for processing the data and performing downstream
 analysis.
 
@@ -158,7 +162,7 @@ Note that the percentage of missing values at PSMs and peptides levels are,
 respectively,
 `r paste0(round(100 * mean(is.na(assay(fts[["psms"]]))), 2), "%")` and 
 `r paste0(round(100 * mean(is.na(assay(fts[["peptides"]]))), 2), "%")`.
-
+@fig-missing_values_peptides
 Let's inspect the missing values distribution at peptides level.
 
 ```{r vis-miss-peptides}
@@ -192,6 +196,19 @@ From @fig-missing_values_peptides and @fig-missing_values_proteins it is
 observed that the missing values are greater at peptides level than proteins,
 as expected. This fact will guide our decision of imputation technique.
 
+In @fig-number_peptides we show the distribution of the number of peptides
+used to aggregate at protein level. It is observe that most of the proteins 
+are connected to 3-6 peptides.
+
+```{r r-vis-number-peptides}
+#| fig-width: 8
+#| label: fig-number_peptides
+#| fig-cap: Distribution of the peptides number matches with proteins. 
+plot(table(rowData(fts[["proteins"]])$.n), ylab = "Total")
+```
+
+
+
 # Processing steps {#sec-processing}
 
 Processing the raw data set is a crucial task when analyzing omics data.
@@ -203,7 +220,7 @@ It is important to mention that the processing steps performs at proteins
 level, since as shown in @fig-missing_values_peptides and
 @fig-missing_values_proteins there are many missing values at peptides
 level, which can affect proper corrections.
-Furthermore, the imputation and normalization are performed at log2
+Furthermore, the imputation and normalization are performed at $\log_2$
 transformed intensity.
 
 ## Filtering
@@ -236,12 +253,12 @@ The imputation of missing at random (MAR) values is very discussed in theory
 and real applications. In the context of label-free quantitative proteomics
 data @Lazar2016 performed a series of imputation methods comparison using
 simulated data set. The authors showed that overall the MAR-devoted methods,
-specifically _k_NN, SVD and MLE provided good performance for the imputation
+specifically _k_-NN, SVD and MLE provided good performance for the imputation
 task.
 
-In this study, we consider the _k_NN method implemented in the Bioconductor
+In this study, we consider the _k_-NN method implemented in the Bioconductor
 R package `impute` [@Hastie2022]. For each protein abundance, $x_i$ the method
-the _k_NN method works as follows:
+the _k_-NN method works as follows:
 
   1. Calculate the Euclidean distance between $\mathbf{x}_i^c$ and all other
   proteins in $\mathbf{X}^c$;
@@ -256,7 +273,7 @@ of $x_i$ and all other proteins.
 ```{r imputation}
 assay(fts[["proteins"]], "log2_intensity") <- log2(assay(fts[["proteins"]]))
 logx_imputed <- impute::impute.knn(
-  data = assay(fts[["proteins"]], "log2_intensity"))
+  data = assay(fts[["proteins"]], "log2_intensity"), k = 10L)
 assay(fts[["proteins"]], "log2_imputed") <- logx_imputed$data
 ```
 
@@ -395,3 +412,7 @@ ggplot(tb, aes(x = PC1, y = PC2, col = group)) +
   scale_y_continuous(breaks = scales::pretty_breaks(8))
 ```
 
+
+```{r saving-fts, include=FALSE}
+saveRDS(object = fts, file = "../data/fts_processed.rds")
+```
