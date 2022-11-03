@@ -244,7 +244,7 @@ ggplot(data_intersect, aes(x = reorder(group, -n), y = n)) +
 
 
 ```{r save-data}
-
+saveRDS(fts, file = "../data/fts_processed.rds")
 ```
 
 
