@@ -30,26 +30,26 @@ theme_set(
 
 # Introduction {#sec-intro}
 
-This report describes the processing steps use to organized the 
-label-free proteomics of _Escherichia_ _coli_ cultures of bacteria data.
+This report describes the processing steps used to organize the 
+label-free proteomics of _Escherichia_ _coli_ cultures bacterial data.
 This data was first analyzed by @Margalit2022.
 
-The report is organized as follows. @sec-data describe data import and management
-using QFeatures package. Processing steps, namely filtering, imputation and
+The report is organized as followed. @sec-data describes data import and management
+using the QFeatures package. Processing steps, namely filtering, imputation, and
 normalization are discussed in @sec-processing.
 Finally, @sec-comparison presents a comparison between the processed data from
-original paper and the steps performed.
+the original paper and from the steps performed below.
 
 # Data import and management {#sec-data}
 
-The data from @Margalit2022 experiment was first pre-processed using
-[MaxQuant](https://www.maxquant.org/) software. MaxQuant provides the 
-`evidence.txt` file which combines all the information about identified peptides
+The data from @Margalit2022 experiment was first pre-processed using the
+[MaxQuant](https://www.maxquant.org/) software. MaxQuant provides an 
+`evidence.txt` file that combines all the information about identified peptides
 and is the only file required for processing the data and performing downstream
 analysis.
 
-The first step we read the evidence file, filters out contaminants and reverse
-sequences, remove the Tetracycline antibiotic and pivot the matrix data in
+For the first step, we read the evidence file, filter out contaminants and reverse
+sequences, remove the Tetracycline antibiotic, and pivot the matrix data in
 wide format.
 
 ```{r data-import}
@@ -89,7 +89,7 @@ data_raw <- data_raw[, chosen_cols] |>
   dplyr::arrange(experiment, modified_sequence, protein)
 data_raw$unique_id <- seq.int(1, nrow(data_raw))
 
-# Pivot to create the data matrix at PSMs level
+# Pivot to create the data matrix at PSM's level
 pivotted_psms <- tidyr::pivot_wider(
   data = data_raw,
   id_cols = c(unique_id, number_peptides, modified_sequence, protein),
@@ -100,14 +100,14 @@ dplyr::glimpse(pivotted_psms)
 ```
 
 A useful infrastructure for omics data management in R is the
-`SummarizedExperiment` class [@Morgan2022]. For quantitative proteomics data
-we have the `QFeatures` package [@Gatto2022] which provides infrastructure
+`SummarizedExperiment` class [@Morgan2022]. For quantitative proteomics data,
+we have the `QFeatures` package [@Gatto2022] which provides an infrastructure
 to process and manage the data.
 
-In the sequel an object of `SummarizedExperiment` is created with the
-intensity at PSMs level, then it is store in at `QFeatures` object. Finally,
-we aggregate from PSMs to peptides level by computing the median across the
-PSMs observations for each sample.
+For the second step, an object of `SummarizedExperiment` is created with the
+intensity at the PSM's level. It is then stored in a `QFeatures` object. Finally,
+we aggregate from PSM's to peptide level by computing the median across the
+PSM's observations for each sample.
 
 ```{r qfeature-obj}
 # Columns data referring the design of experiment
@@ -125,7 +125,7 @@ col_data <- DataFrame(group = group_names,
                       sample_names = samples_names,
                       row.names = paste0("Sample_",
                                          seq_len(length(group_names))))
-# Creating a SummarizedExperiment for PSMs level
+# Creating a SummarizedExperiment for PSM#s level
 row_data <- pivotted_psms[, c(1:4)]
 m_psms <- as.matrix(pivotted_psms[, -c(1:4)])
 colnames(m_psms) <- rownames(col_data)
@@ -139,7 +139,7 @@ assayNames(fts[["psms"]])[1L] <- "intensity"
 colData(fts) <- col_data
 
 # Aggregate data at peptide level -----------------------------------------
-# rows: peptides sequences and columns: samples
+# rows: peptide sequences & columns: samples
 fts <- aggregateFeatures(object = fts, i = "psms", fcol = "modified_sequence",
                          name = "peptides", fun = colMedians, na.rm = TRUE)
 fts
@@ -149,40 +149,40 @@ rowData(fts[["peptides"]])
 assayNames(fts[["peptides"]])[1L] <- "intensity"
 ```
 
-In this stage, it is important to note that at PSMs level we have a intensity
-matrix with dimensions `r dim(fts[["psms"]])`, while at peptides level we
-have `r dim(fts[["peptides"]])`.
+In this stage, it is important to note that at the PSM's level we have an intensity
+matrix with dimensions `r dim(fts[["psms"]])`, while at the peptide level we
+have dimensions `r dim(fts[["peptides"]])`.
 
-A common feature of label-free proteomics data is the great quantity of 
-missing values due to absence of detection of a feature. For such cases,
-the missing values are expected to be randomly distributed in the data, thus
-are missing at random (MAR).
+A common feature of label-free proteomics data is the large number of 
+missing values due to the absence of feature detection. For such cases,
+the missing values are expected to be randomly distributed in the data, thus 
+referred to as missing at random (MAR).
 
-Note that the percentage of missing values at PSMs and peptides levels are,
+Note that the percentage of missing values at PSM's and peptide levels are,
 respectively,
 `r paste0(round(100 * mean(is.na(assay(fts[["psms"]]))), 2), "%")` and 
 `r paste0(round(100 * mean(is.na(assay(fts[["peptides"]]))), 2), "%")`.
 @fig-missing_values_peptides
-Let's inspect the missing values distribution at peptides level.
+shows us distribution of the missing values at peptide level.
 
 ```{r vis-miss-peptides}
 #| fig-height: 8
 #| label: fig-missing_values_peptides
-#| fig-cap: Distribution of missing values at peptides level.
+#| fig-cap: Distribution of missing values at peptide level.
 data_ <- as.data.frame(assay(fts[["peptides"]]))
 colnames(data_) <- fts$sample_names
 naniar::vis_miss(data_)
 ```
 
-Now, we will aggregate at proteins level by computing the median and examine
+Now, we will aggregate at protein level by computing the median and examining
 the distribution of missing values. The percentage of missing values at
-proteins level is
+protein level is
 `r paste0(round(100 * mean(is.na(assay(fts[["proteins"]]))), 2), "%")`.
 
 ```{r vis-miss-proteins}
 #| fig-height: 8
 #| label: fig-missing_values_proteins
-#| fig-cap: Distribution of missing values at proteins level.
+#| fig-cap: Distribution of missing values at protein level.
 fts <- aggregateFeatures(object = fts, i = "peptides", fcol = "protein",
                          name = "proteins", fun = colMedians, na.rm = TRUE)
 assayNames(fts[["proteins"]])[1L] <- "intensity"
@@ -192,18 +192,18 @@ colnames(data_) <- fts$sample_names
 naniar::vis_miss(data_)
 ```
 
-From @fig-missing_values_peptides and @fig-missing_values_proteins it is
-observed that the missing values are greater at peptides level than proteins,
-as expected. This fact will guide our decision of imputation technique.
+From @fig-missing_values_peptides and @fig-missing_values_proteins we can see 
+that the missing values at peptide level are greater than that of protein level
+(as expected). This fact will guide our decision on the imputation technique.
 
-In @fig-number_peptides we show the distribution of the number of peptides
-used to aggregate at protein level. It is observe that most of the proteins 
+@fig-number_peptides shows the distribution of the number of peptides
+used to aggregate at the protein level. The figure shows that most of the proteins 
 are connected to 3-6 peptides.
 
 ```{r r-vis-number-peptides}
 #| fig-width: 8
 #| label: fig-number_peptides
-#| fig-cap: Distribution of the peptides number matches with proteins. 
+#| fig-cap: Distribution of the peptide number matches with proteins. 
 plot(table(rowData(fts[["proteins"]])$.n), ylab = "Total")
 ```
 
@@ -213,23 +213,23 @@ plot(table(rowData(fts[["proteins"]])$.n), ylab = "Total")
 
 Processing the raw data set is a crucial task when analyzing omics data.
 Proteomics quantification data have technical variability due to experimental
-process, remove those variability and keep only the biological ones is
-fundamental for the downstream statistical analysis.
+processes. Removing that variability and keeping only the biological variability 
+is fundamental for later downstream statistical analysis.
 
-It is important to mention that the processing steps performs at proteins
+It is important to mention that these processing steps are performed at the protein
 level, since as shown in @fig-missing_values_peptides and
-@fig-missing_values_proteins there are many missing values at peptides
+@fig-missing_values_proteins, there are many missing values at the peptide
 level, which can affect proper corrections.
 Furthermore, the imputation and normalization are performed at $\log_2$
 transformed intensity.
 
 ## Filtering
 
-First, note from @fig-ecdf_missing_values_proteins  that 50% of the proteins
+First, we note that from @fig-ecdf_missing_values_proteins 50% of the proteins
 (total of 778) do not have any missing values in all samples.
-However, 21% of the proteins have more than 50% of missing values across 
-all samples (see the red dot). Therefore, we will remove the proteins that
-have more than 50% of missing values.
+However, 21% of the proteins have more than 50% missing values across 
+all samples (see the red dot). Therefore, we will remove these above mentioned
+proteins.
 
 ```{r filt}
 #| fig-width: 8
@@ -249,11 +249,11 @@ fts[["proteins"]] <- fts[["proteins"]][na_proteins < th, ]
 
 ## Imputation
 
-The imputation of missing at random (MAR) values is very discussed in theory
-and real applications. In the context of label-free quantitative proteomics
-data @Lazar2016 performed a series of imputation methods comparison using
+The imputation of missing at random (MAR) values is widely discussed in both theory
+and real practice. In the context of label-free quantitative proteomics
+data @Lazar2016 performed a series of imputation method comparisons using a
 simulated data set. The authors showed that overall the MAR-devoted methods,
-specifically _k_-NN, SVD and MLE provided good performance for the imputation
+specifically _k_-NN, SVD, and MLE provided good performance for the imputation
 task.
 
 In this study, we consider the _k_-NN method implemented in the Bioconductor
@@ -281,14 +281,14 @@ assay(fts[["proteins"]], "log2_imputed") <- logx_imputed$data
 
 Normalization aims to remove systematic differences due to experimental 
 instrumentation, ensuring that any observed heterogeneity or differential
-expression between samples are driven by biology not technical biases.
-For label-free proteomics quantification data @Valikangas2018 systematic
-reviewed normalization methods using spike-in data sets. The authors shows that
+expression between samples is driven by biological and not technical biases.
+For label-free proteomics quantification data @Valikangas2018 systematically
+reviewed normalization methods using spike-in data sets. The authors showed that
 the faster cyclic loess normalization introduced by @Ballman2004 gives well
-results for proteomics data.
+performing results for proteomics data.
 We use the faster cyclic loess for normalization on the imputed log2 intensity.
-This method is implemented in `normalizeCyclicLoess` function with argument 
-`method = "fast"` from `limma` package [@Ritchie2015].
+This method is implemented in `normalizeCyclicLoess` function with the argument 
+`method = "fast"` from the `limma` package [@Ritchie2015].
 
 
 ```{r normalization}
@@ -299,8 +299,8 @@ assay(fts[["proteins"]], "log2_normalized") <- limma::normalizeCyclicLoess(
 
 # Comparison {#sec-comparison}
 
-This section shows graphical comparison between the data set processed by
-@Margalit2022 and our proposal describes below.
+This section shows a graphical comparison between the data set processed by
+@Margalit2022 and our proposed processing.
 
 ```{r import-margalit, include=FALSE}
 se_margalit <- readRDS("../data/se_processed.rds")
@@ -336,10 +336,10 @@ data_pivotted <- dplyr::bind_rows(
       "Log2 intensity imputed"))
 ```
 
-@fig-densities shows the proteins abundance densities colored by group and
+@fig-densities shows the protein abundance densities coloured by group and
 faceted according to the transformation performed. The Unprocessed intensity
-panel shows a very highly skewed distributions. The others panel present the
-transformed intensity and we can see that the distribution is symmetric.
+panel shows a very highly skewed distribution. The other panels show the
+transformed intensity where we can see that the distribution is more symmetric.
 When comparing the two below panels we can observe the effect of normalization.
 
 
@@ -356,7 +356,7 @@ ggplot(data_pivotted, aes(x = value, fill = group, col = group)) +
 
 @fig-densities_comparison gives a comparison between the densities by the
 processing methods. We clearly see that the distribution by @Margalit2022
-are spreader than ours, which are more symmetric.
+are spread our more than ours, which are more symmetric.
 
 ```{r densities-comparison}
 #| fig-width: 8
@@ -375,7 +375,7 @@ data_pivotted |>
   scale_y_continuous(breaks = scales::pretty_breaks(6))
 ```
 
-Other graphical inspection between the data process steps is provided by the
+Another graphical inspection between the data processing steps is provided by the
 PCA plots in @fig-pca. From the second panel we can see that
 the samples from the same group are closer, while the data process used by
 @Margalit2022 only grouped the samples from Cipofloxaxin.
