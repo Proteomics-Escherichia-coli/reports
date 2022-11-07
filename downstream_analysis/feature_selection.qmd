@@ -136,11 +136,14 @@ ggplot(dplyr::as_tibble(dec_2), aes(x = bio)) +
 For each comparison (Control vs Treatment) we can see which proteins are
 up/down regulated in the control and remove them from the treatment because
 it means that their expression is regulated by physiological gene expression.
-We use the Hedge's G effect size statistic to do that. The statistic is defined
-as followed
+Typically, Cohen's D is used for effect size calculation, however was noted to
+be biased with regard to small sample sizes [@Bornstein2009]. To address this
+we convert Cohen's D to Hedge's G by applying a correction factor [@Hedges1981]. 
+The statistic is defined as followed, with the `hedges_g` function from the 
+`effectsize` package [@Ben-Shachar2020] being used.
 
 $$ 
-G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (1 - \frac{3}{(4\; (n1 + n2) - 9})
+G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (J) \;\;\; where \; J \approx (1 - \frac{3}{(4\; (n1 + n2) - 9})
 $$
 
 ```{r effect-size}

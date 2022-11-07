@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="André F. B. Menezes, Beatrice Tropea, and Cormac Monaghan">
-<meta name="dcterms.date" content="2022-11-04">
+<meta name="dcterms.date" content="2022-11-07">
 
 <title>Feature selection analysis</title>
 <style>
@@ -2580,7 +2580,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 4, 2022</p>
+      <p class="date">November 7, 2022</p>
     </div>
   </div>
     
@@ -2789,9 +2789,9 @@ FALSE  TRUE
 </section>
 <section id="sec-effect_size" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Effect size statistic</h1>
-<p>For each comparison (Control vs Treatment) we can see which proteins are up/down regulated in the control and remove them from the treatment because it means that their expression is regulated by physiological gene expression. We use the Hedge’s G effect size statistic to do that. The statistic is defined as followed</p>
+<p>For each comparison (Control vs Treatment) we can see which proteins are up/down regulated in the control and remove them from the treatment because it means that their expression is regulated by physiological gene expression. Typically, Cohen’s D is used for effect size calculation, however was noted to be biased with regard to small sample sizes <span class="citation" data-cites="Bornstein2009">(<a href="#ref-Bornstein2009" role="doc-biblioref">Borenstein et al. 2009</a>)</span>. To address this we convert Cohen’s D to Hedge’s G by applying a correction factor <span class="citation" data-cites="Hedges1981">(<a href="#ref-Hedges1981" role="doc-biblioref">Hedges 1981</a>)</span>. The statistic is defined as followed, with the <code>hedges_g</code> function from the <code>effectsize</code> package <span class="citation" data-cites="Ben-Shachar2020">(<a href="#ref-Ben-Shachar2020" role="doc-biblioref">Ben-Shachar, Lüdecke, and Makowski 2020</a>)</span> being used.</p>
 <p><span class="math display">
-G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (1 - \frac{3}{(4\; (n1 + n2) - 9})
+G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (J) \;\;\; where \; J \approx (1 - \frac{3}{(4\; (n1 + n2) - 9})
 </span></p>
 <div class="cell">
 <details>
@@ -2934,6 +2934,15 @@ ACQ42036.1          0.12333831</code></pre>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-Ben-Shachar2020" class="csl-entry" role="doc-biblioentry">
+Ben-Shachar, Mattan S., Daniel Lüdecke, and Dominique Makowski. 2020. <span>“<span class="nocase">e</span>ffectsize: Estimation of Effect Size Indices and Standardized Parameters.”</span> <em>Journal of Open Source Software</em> 5 (56): 2815. <a href="https://doi.org/10.21105/joss.02815">https://doi.org/10.21105/joss.02815</a>.
+</div>
+<div id="ref-Bornstein2009" class="csl-entry" role="doc-biblioentry">
+Borenstein, M., L. V. Hedges, J. P. Higgins, and H. R. Rothstein. 2009. <em>Introduction to Meta-Analysis</em>. John Wiley &amp; Sons.
+</div>
+<div id="ref-Hedges1981" class="csl-entry" role="doc-biblioentry">
+Hedges, L. V. 1981. <span>“Distribution Theory for Glass’s Estimator of Effect Size and Related Estimators.”</span> <em>Journal of Educational Statistics</em> 6 (2): 107–28. <a href="https://doi.org/10.3102/10769986006002107">https://doi.org/10.3102/10769986006002107</a>.
+</div>
 <div id="ref-Aaron2016" class="csl-entry" role="doc-biblioentry">
 Lun, Aaron T. L., Davis J. McCarthy, and John C. Marioni. 2016. <span>“A Step-by-Step Workflow for Low-Level Analysis of Single-Cell RNA-Seq Data with Bioconductor.”</span> <em>F1000Res.</em> 5: 2122. <a href="https://doi.org/10.12688/f1000research.9501.2">https://doi.org/10.12688/f1000research.9501.2</a>.
 </div>
@@ -3225,120 +3234,123 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-138"><a href="#cb25-138" aria-hidden="true" tabindex="-1"></a>For each comparison (Control vs Treatment) we can see which proteins are</span>
 <span id="cb25-139"><a href="#cb25-139" aria-hidden="true" tabindex="-1"></a>up/down regulated in the control and remove them from the treatment because</span>
 <span id="cb25-140"><a href="#cb25-140" aria-hidden="true" tabindex="-1"></a>it means that their expression is regulated by physiological gene expression.</span>
-<span id="cb25-141"><a href="#cb25-141" aria-hidden="true" tabindex="-1"></a>We use the Hedge&#39;s G effect size statistic to do that. The statistic is defined</span>
-<span id="cb25-142"><a href="#cb25-142" aria-hidden="true" tabindex="-1"></a>as followed</span>
-<span id="cb25-143"><a href="#cb25-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-144"><a href="#cb25-144" aria-hidden="true" tabindex="-1"></a>$$ </span>
-<span id="cb25-145"><a href="#cb25-145" aria-hidden="true" tabindex="-1"></a>G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (1 - \frac{3}{(4\; (n1 + n2) - 9})</span>
-<span id="cb25-146"><a href="#cb25-146" aria-hidden="true" tabindex="-1"></a>$$</span>
-<span id="cb25-147"><a href="#cb25-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-148"><a href="#cb25-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{r effect-size}</span></span>
-<span id="cb25-149"><a href="#cb25-149" aria-hidden="true" tabindex="-1"></a>ampicillin <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
-<span id="cb25-150"><a href="#cb25-150" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
-<span id="cb25-151"><a href="#cb25-151" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(z)  effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], z[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
-<span id="cb25-152"><a href="#cb25-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-153"><a href="#cb25-153" aria-hidden="true" tabindex="-1"></a>cefotaxime <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
-<span id="cb25-154"><a href="#cb25-154" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
-<span id="cb25-155"><a href="#cb25-155" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
-<span id="cb25-156"><a href="#cb25-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-157"><a href="#cb25-157" aria-hidden="true" tabindex="-1"></a>ciprofloxacin <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
-<span id="cb25-158"><a href="#cb25-158" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
-<span id="cb25-159"><a href="#cb25-159" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
-<span id="cb25-160"><a href="#cb25-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-161"><a href="#cb25-161" aria-hidden="true" tabindex="-1"></a>impipenem <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
-<span id="cb25-162"><a href="#cb25-162" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
-<span id="cb25-163"><a href="#cb25-163" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">13</span><span class="sc">:</span><span class="dv">15</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
-<span id="cb25-164"><a href="#cb25-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-165"><a href="#cb25-165" aria-hidden="true" tabindex="-1"></a><span class="co"># Organize the results in a data frame</span></span>
-<span id="cb25-166"><a href="#cb25-166" aria-hidden="true" tabindex="-1"></a>effect_sizes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ampicillin, cefotaxime, ciprofloxacin, impipenem)</span>
-<span id="cb25-167"><a href="#cb25-167" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(effect_sizes) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;hedges_g__&quot;</span>, <span class="fu">colnames</span>(effect_sizes))</span>
-<span id="cb25-168"><a href="#cb25-168" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(effect_sizes)</span>
-<span id="cb25-169"><a href="#cb25-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-170"><a href="#cb25-170" aria-hidden="true" tabindex="-1"></a><span class="co"># Concatenating</span></span>
-<span id="cb25-171"><a href="#cb25-171" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all.equal</span>(<span class="fu">rownames</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]), <span class="fu">rownames</span>(effect_sizes)))</span>
-<span id="cb25-172"><a href="#cb25-172" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowData</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">rowData</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]), effect_sizes)</span>
-<span id="cb25-173"><a href="#cb25-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb25-174"><a href="#cb25-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-175"><a href="#cb25-175" aria-hidden="true" tabindex="-1"></a>@fig-densities_hedges_g shows the density of the absolute values of the Hedge&#39;s G</span>
-<span id="cb25-176"><a href="#cb25-176" aria-hidden="true" tabindex="-1"></a>statistic according to the treatment. </span>
+<span id="cb25-141"><a href="#cb25-141" aria-hidden="true" tabindex="-1"></a>Typically, Cohen&#39;s D is used for effect size calculation, however was noted to</span>
+<span id="cb25-142"><a href="#cb25-142" aria-hidden="true" tabindex="-1"></a>be biased with regard to small sample sizes <span class="co">[</span><span class="ot">@Bornstein2009</span><span class="co">]</span>. To address this</span>
+<span id="cb25-143"><a href="#cb25-143" aria-hidden="true" tabindex="-1"></a>we convert Cohen&#39;s D to Hedge&#39;s G by applying a correction factor <span class="co">[</span><span class="ot">@Hedges1981</span><span class="co">]</span>. </span>
+<span id="cb25-144"><a href="#cb25-144" aria-hidden="true" tabindex="-1"></a>The statistic is defined as followed, with the <span class="in">`hedges_g`</span> function from the </span>
+<span id="cb25-145"><a href="#cb25-145" aria-hidden="true" tabindex="-1"></a><span class="in">`effectsize`</span> package <span class="co">[</span><span class="ot">@Ben-Shachar2020</span><span class="co">]</span> being used.</span>
+<span id="cb25-146"><a href="#cb25-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-147"><a href="#cb25-147" aria-hidden="true" tabindex="-1"></a>$$ </span>
+<span id="cb25-148"><a href="#cb25-148" aria-hidden="true" tabindex="-1"></a>G = \frac{(M_1 - M_2)}{\sqrt{\frac{{SD_1^2 + SD_2^2}}{2}}} \;\; (J) \;\;\; where \; J \approx (1 - \frac{3}{(4\; (n1 + n2) - 9})</span>
+<span id="cb25-149"><a href="#cb25-149" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb25-150"><a href="#cb25-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-151"><a href="#cb25-151" aria-hidden="true" tabindex="-1"></a><span class="in">```{r effect-size}</span></span>
+<span id="cb25-152"><a href="#cb25-152" aria-hidden="true" tabindex="-1"></a>ampicillin <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
+<span id="cb25-153"><a href="#cb25-153" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
+<span id="cb25-154"><a href="#cb25-154" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(z)  effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(z[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], z[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
+<span id="cb25-155"><a href="#cb25-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-156"><a href="#cb25-156" aria-hidden="true" tabindex="-1"></a>cefotaxime <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
+<span id="cb25-157"><a href="#cb25-157" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
+<span id="cb25-158"><a href="#cb25-158" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
+<span id="cb25-159"><a href="#cb25-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-160"><a href="#cb25-160" aria-hidden="true" tabindex="-1"></a>ciprofloxacin <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
+<span id="cb25-161"><a href="#cb25-161" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
+<span id="cb25-162"><a href="#cb25-162" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">7</span><span class="sc">:</span><span class="dv">9</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
+<span id="cb25-163"><a href="#cb25-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-164"><a href="#cb25-164" aria-hidden="true" tabindex="-1"></a>impipenem <span class="ot">&lt;-</span> <span class="fu">apply</span>(</span>
+<span id="cb25-165"><a href="#cb25-165" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assay</span>(fts[[<span class="st">&quot;proteins&quot;</span>]], <span class="at">i =</span> <span class="st">&quot;log2_normalized&quot;</span>), <span class="dv">1</span>,</span>
+<span id="cb25-166"><a href="#cb25-166" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(x) effectsize<span class="sc">::</span><span class="fu">hedges_g</span>(x[<span class="dv">13</span><span class="sc">:</span><span class="dv">15</span>], x[<span class="dv">10</span><span class="sc">:</span><span class="dv">12</span>])<span class="sc">$</span>Hedges_g)</span>
+<span id="cb25-167"><a href="#cb25-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-168"><a href="#cb25-168" aria-hidden="true" tabindex="-1"></a><span class="co"># Organize the results in a data frame</span></span>
+<span id="cb25-169"><a href="#cb25-169" aria-hidden="true" tabindex="-1"></a>effect_sizes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ampicillin, cefotaxime, ciprofloxacin, impipenem)</span>
+<span id="cb25-170"><a href="#cb25-170" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(effect_sizes) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;hedges_g__&quot;</span>, <span class="fu">colnames</span>(effect_sizes))</span>
+<span id="cb25-171"><a href="#cb25-171" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(effect_sizes)</span>
+<span id="cb25-172"><a href="#cb25-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-173"><a href="#cb25-173" aria-hidden="true" tabindex="-1"></a><span class="co"># Concatenating</span></span>
+<span id="cb25-174"><a href="#cb25-174" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all.equal</span>(<span class="fu">rownames</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]), <span class="fu">rownames</span>(effect_sizes)))</span>
+<span id="cb25-175"><a href="#cb25-175" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowData</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]) <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">rowData</span>(fts[[<span class="st">&quot;proteins&quot;</span>]]), effect_sizes)</span>
+<span id="cb25-176"><a href="#cb25-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb25-177"><a href="#cb25-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-178"><a href="#cb25-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{r densities-hedges-g}</span></span>
-<span id="cb25-179"><a href="#cb25-179" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
-<span id="cb25-180"><a href="#cb25-180" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-densities_hedges_g</span></span>
-<span id="cb25-181"><a href="#cb25-181" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Density of the absolute value of Hedges&#39;G statistics compared with the control for each protein and according to the treatment.</span></span>
-<span id="cb25-182"><a href="#cb25-182" aria-hidden="true" tabindex="-1"></a>pivotted_ef <span class="ot">&lt;-</span> effect_sizes <span class="sc">|&gt;</span></span>
-<span id="cb25-183"><a href="#cb25-183" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">protein =</span> <span class="fu">rownames</span>(effect_sizes)) <span class="sc">|&gt;</span> </span>
-<span id="cb25-184"><a href="#cb25-184" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>protein, <span class="at">names_to =</span> <span class="st">&quot;hedges_g&quot;</span>,</span>
-<span id="cb25-185"><a href="#cb25-185" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb25-186"><a href="#cb25-186" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">gsub</span>(<span class="st">&quot;hedges_g__&quot;</span>, <span class="st">&quot;&quot;</span>, hedges_g))</span>
-<span id="cb25-187"><a href="#cb25-187" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pivotted_ef, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">abs</span>(value))) <span class="sc">+</span></span>
-<span id="cb25-188"><a href="#cb25-188" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable) <span class="sc">+</span></span>
-<span id="cb25-189"><a href="#cb25-189" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb25-190"><a href="#cb25-190" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rug</span>() <span class="sc">+</span></span>
-<span id="cb25-191"><a href="#cb25-191" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Absolute value of Hedges&#39;G&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
-<span id="cb25-192"><a href="#cb25-192" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="dv">8</span>))</span>
-<span id="cb25-193"><a href="#cb25-193" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb25-194"><a href="#cb25-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-195"><a href="#cb25-195" aria-hidden="true" tabindex="-1"></a>After computing the Hedge&#39;s G statistic we have to consider a threshold to</span>
-<span id="cb25-196"><a href="#cb25-196" aria-hidden="true" tabindex="-1"></a>filter the most variability proteins. We will consider 0.5 as the threshold,</span>
-<span id="cb25-197"><a href="#cb25-197" aria-hidden="true" tabindex="-1"></a>since this value means a moderate effect against the control.</span>
-<span id="cb25-198"><a href="#cb25-198" aria-hidden="true" tabindex="-1"></a>@fig-densities_hedges_g displays the total number of proteins selected by group.</span>
-<span id="cb25-199"><a href="#cb25-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-200"><a href="#cb25-200" aria-hidden="true" tabindex="-1"></a><span class="in">```{r checking}</span></span>
-<span id="cb25-201"><a href="#cb25-201" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
-<span id="cb25-202"><a href="#cb25-202" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-total_hedges_g</span></span>
-<span id="cb25-203"><a href="#cb25-203" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Total of selected proteins by group. The rule of thumb is the absolute value of Hedges greater than 0.5. </span></span>
-<span id="cb25-204"><a href="#cb25-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-205"><a href="#cb25-205" aria-hidden="true" tabindex="-1"></a>total_filtered <span class="ot">&lt;-</span> pivotted_ef <span class="sc">|&gt;</span></span>
-<span id="cb25-206"><a href="#cb25-206" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(variable) <span class="sc">|&gt;</span> </span>
-<span id="cb25-207"><a href="#cb25-207" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">sum</span>(<span class="fu">abs</span>(value) <span class="sc">&gt;</span> <span class="fl">0.5</span>),</span>
-<span id="cb25-208"><a href="#cb25-208" aria-hidden="true" tabindex="-1"></a>                   <span class="at">pct =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(value) <span class="sc">&gt;</span> <span class="fl">0.5</span>),</span>
-<span id="cb25-209"><a href="#cb25-209" aria-hidden="true" tabindex="-1"></a>                   <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
-<span id="cb25-210"><a href="#cb25-210" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(total_filtered, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(variable, <span class="sc">-</span>n), <span class="at">y =</span> n)) <span class="sc">+</span></span>
-<span id="cb25-211"><a href="#cb25-211" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb25-212"><a href="#cb25-212" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(n, <span class="st">&quot; (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> pct, <span class="dv">2</span>), <span class="st">&quot;%)&quot;</span>)),</span>
-<span id="cb25-213"><a href="#cb25-213" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb25-214"><a href="#cb25-214" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
-<span id="cb25-215"><a href="#cb25-215" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb25-216"><a href="#cb25-216" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb25-217"><a href="#cb25-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb25-218"><a href="#cb25-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-219"><a href="#cb25-219" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-220"><a href="#cb25-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-221"><a href="#cb25-221" aria-hidden="true" tabindex="-1"></a><span class="fu"># Comparison {#sec-comparison}</span></span>
+<span id="cb25-178"><a href="#cb25-178" aria-hidden="true" tabindex="-1"></a>@fig-densities_hedges_g shows the density of the absolute values of the Hedge&#39;s G</span>
+<span id="cb25-179"><a href="#cb25-179" aria-hidden="true" tabindex="-1"></a>statistic according to the treatment. </span>
+<span id="cb25-180"><a href="#cb25-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-181"><a href="#cb25-181" aria-hidden="true" tabindex="-1"></a><span class="in">```{r densities-hedges-g}</span></span>
+<span id="cb25-182"><a href="#cb25-182" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb25-183"><a href="#cb25-183" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-densities_hedges_g</span></span>
+<span id="cb25-184"><a href="#cb25-184" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Density of the absolute value of Hedges&#39;G statistics compared with the control for each protein and according to the treatment.</span></span>
+<span id="cb25-185"><a href="#cb25-185" aria-hidden="true" tabindex="-1"></a>pivotted_ef <span class="ot">&lt;-</span> effect_sizes <span class="sc">|&gt;</span></span>
+<span id="cb25-186"><a href="#cb25-186" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">protein =</span> <span class="fu">rownames</span>(effect_sizes)) <span class="sc">|&gt;</span> </span>
+<span id="cb25-187"><a href="#cb25-187" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>protein, <span class="at">names_to =</span> <span class="st">&quot;hedges_g&quot;</span>,</span>
+<span id="cb25-188"><a href="#cb25-188" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">&quot;value&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb25-189"><a href="#cb25-189" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">gsub</span>(<span class="st">&quot;hedges_g__&quot;</span>, <span class="st">&quot;&quot;</span>, hedges_g))</span>
+<span id="cb25-190"><a href="#cb25-190" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(pivotted_ef, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">abs</span>(value))) <span class="sc">+</span></span>
+<span id="cb25-191"><a href="#cb25-191" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable) <span class="sc">+</span></span>
+<span id="cb25-192"><a href="#cb25-192" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb25-193"><a href="#cb25-193" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rug</span>() <span class="sc">+</span></span>
+<span id="cb25-194"><a href="#cb25-194" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Absolute value of Hedges&#39;G&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Density&quot;</span>) <span class="sc">+</span></span>
+<span id="cb25-195"><a href="#cb25-195" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> scales<span class="sc">::</span><span class="fu">pretty_breaks</span>(<span class="dv">8</span>))</span>
+<span id="cb25-196"><a href="#cb25-196" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-197"><a href="#cb25-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-198"><a href="#cb25-198" aria-hidden="true" tabindex="-1"></a>After computing the Hedge&#39;s G statistic we have to consider a threshold to</span>
+<span id="cb25-199"><a href="#cb25-199" aria-hidden="true" tabindex="-1"></a>filter the most variability proteins. We will consider 0.5 as the threshold,</span>
+<span id="cb25-200"><a href="#cb25-200" aria-hidden="true" tabindex="-1"></a>since this value means a moderate effect against the control.</span>
+<span id="cb25-201"><a href="#cb25-201" aria-hidden="true" tabindex="-1"></a>@fig-densities_hedges_g displays the total number of proteins selected by group.</span>
+<span id="cb25-202"><a href="#cb25-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-203"><a href="#cb25-203" aria-hidden="true" tabindex="-1"></a><span class="in">```{r checking}</span></span>
+<span id="cb25-204"><a href="#cb25-204" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb25-205"><a href="#cb25-205" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-total_hedges_g</span></span>
+<span id="cb25-206"><a href="#cb25-206" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Total of selected proteins by group. The rule of thumb is the absolute value of Hedges greater than 0.5. </span></span>
+<span id="cb25-207"><a href="#cb25-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-208"><a href="#cb25-208" aria-hidden="true" tabindex="-1"></a>total_filtered <span class="ot">&lt;-</span> pivotted_ef <span class="sc">|&gt;</span></span>
+<span id="cb25-209"><a href="#cb25-209" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(variable) <span class="sc">|&gt;</span> </span>
+<span id="cb25-210"><a href="#cb25-210" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">sum</span>(<span class="fu">abs</span>(value) <span class="sc">&gt;</span> <span class="fl">0.5</span>),</span>
+<span id="cb25-211"><a href="#cb25-211" aria-hidden="true" tabindex="-1"></a>                   <span class="at">pct =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(value) <span class="sc">&gt;</span> <span class="fl">0.5</span>),</span>
+<span id="cb25-212"><a href="#cb25-212" aria-hidden="true" tabindex="-1"></a>                   <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
+<span id="cb25-213"><a href="#cb25-213" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(total_filtered, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(variable, <span class="sc">-</span>n), <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb25-214"><a href="#cb25-214" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb25-215"><a href="#cb25-215" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(n, <span class="st">&quot; (&quot;</span>, <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> pct, <span class="dv">2</span>), <span class="st">&quot;%)&quot;</span>)),</span>
+<span id="cb25-216"><a href="#cb25-216" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb25-217"><a href="#cb25-217" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
+<span id="cb25-218"><a href="#cb25-218" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb25-219"><a href="#cb25-219" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb25-220"><a href="#cb25-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-221"><a href="#cb25-221" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-222"><a href="#cb25-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-223"><a href="#cb25-223" aria-hidden="true" tabindex="-1"></a>Finally, we plot in @fig-intersect-plot the intersection of proteins selected</span>
-<span id="cb25-224"><a href="#cb25-224" aria-hidden="true" tabindex="-1"></a>between the two methods.</span>
+<span id="cb25-223"><a href="#cb25-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-224"><a href="#cb25-224" aria-hidden="true" tabindex="-1"></a><span class="fu"># Comparison {#sec-comparison}</span></span>
 <span id="cb25-225"><a href="#cb25-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-226"><a href="#cb25-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r intersect-plot}</span></span>
-<span id="cb25-227"><a href="#cb25-227" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
-<span id="cb25-228"><a href="#cb25-228" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-intersect-plot</span></span>
-<span id="cb25-229"><a href="#cb25-229" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Total of intersect proteins of the feature selection method by group.</span></span>
-<span id="cb25-230"><a href="#cb25-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-231"><a href="#cb25-231" aria-hidden="true" tabindex="-1"></a>chosen_var <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dec_2)[dec_2<span class="sc">$</span>bio <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
-<span id="cb25-232"><a href="#cb25-232" aria-hidden="true" tabindex="-1"></a>list_df <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb25-233"><a href="#cb25-233" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> 1L</span>
-<span id="cb25-234"><a href="#cb25-234" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">unique</span>(pivotted_ef<span class="sc">$</span>variable)) {</span>
-<span id="cb25-235"><a href="#cb25-235" aria-hidden="true" tabindex="-1"></a>  chosen_hedges_g <span class="ot">&lt;-</span> pivotted_ef[pivotted_ef<span class="sc">$</span>variable <span class="sc">==</span> g <span class="sc">&amp;</span></span>
-<span id="cb25-236"><a href="#cb25-236" aria-hidden="true" tabindex="-1"></a>                                   <span class="fu">abs</span>(pivotted_ef<span class="sc">$</span>value) <span class="sc">&gt;</span> <span class="fl">0.5</span>, ]<span class="sc">$</span>protein</span>
-<span id="cb25-237"><a href="#cb25-237" aria-hidden="true" tabindex="-1"></a>  list_df[[j]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb25-238"><a href="#cb25-238" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> g, <span class="at">n =</span> <span class="fu">length</span>(<span class="fu">intersect</span>(chosen_var, chosen_hedges_g)))</span>
-<span id="cb25-239"><a href="#cb25-239" aria-hidden="true" tabindex="-1"></a>  j <span class="ot">&lt;-</span> j <span class="sc">+</span> 1L</span>
-<span id="cb25-240"><a href="#cb25-240" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb25-241"><a href="#cb25-241" aria-hidden="true" tabindex="-1"></a>data_intersect <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, list_df)</span>
-<span id="cb25-242"><a href="#cb25-242" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_intersect, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(group, <span class="sc">-</span>n), <span class="at">y =</span> n)) <span class="sc">+</span></span>
-<span id="cb25-243"><a href="#cb25-243" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
-<span id="cb25-244"><a href="#cb25-244" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> n), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb25-245"><a href="#cb25-245" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
-<span id="cb25-246"><a href="#cb25-246" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb25-247"><a href="#cb25-247" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(), <span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb25-248"><a href="#cb25-248" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb25-249"><a href="#cb25-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-250"><a href="#cb25-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-251"><a href="#cb25-251" aria-hidden="true" tabindex="-1"></a><span class="in">```{r save-data}</span></span>
+<span id="cb25-226"><a href="#cb25-226" aria-hidden="true" tabindex="-1"></a>Finally, we plot in @fig-intersect-plot the intersection of proteins selected</span>
+<span id="cb25-227"><a href="#cb25-227" aria-hidden="true" tabindex="-1"></a>between the two methods.</span>
+<span id="cb25-228"><a href="#cb25-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-229"><a href="#cb25-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{r intersect-plot}</span></span>
+<span id="cb25-230"><a href="#cb25-230" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb25-231"><a href="#cb25-231" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-intersect-plot</span></span>
+<span id="cb25-232"><a href="#cb25-232" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: Total of intersect proteins of the feature selection method by group.</span></span>
+<span id="cb25-233"><a href="#cb25-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-234"><a href="#cb25-234" aria-hidden="true" tabindex="-1"></a>chosen_var <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dec_2)[dec_2<span class="sc">$</span>bio <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb25-235"><a href="#cb25-235" aria-hidden="true" tabindex="-1"></a>list_df <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb25-236"><a href="#cb25-236" aria-hidden="true" tabindex="-1"></a>j <span class="ot">&lt;-</span> 1L</span>
+<span id="cb25-237"><a href="#cb25-237" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">unique</span>(pivotted_ef<span class="sc">$</span>variable)) {</span>
+<span id="cb25-238"><a href="#cb25-238" aria-hidden="true" tabindex="-1"></a>  chosen_hedges_g <span class="ot">&lt;-</span> pivotted_ef[pivotted_ef<span class="sc">$</span>variable <span class="sc">==</span> g <span class="sc">&amp;</span></span>
+<span id="cb25-239"><a href="#cb25-239" aria-hidden="true" tabindex="-1"></a>                                   <span class="fu">abs</span>(pivotted_ef<span class="sc">$</span>value) <span class="sc">&gt;</span> <span class="fl">0.5</span>, ]<span class="sc">$</span>protein</span>
+<span id="cb25-240"><a href="#cb25-240" aria-hidden="true" tabindex="-1"></a>  list_df[[j]] <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb25-241"><a href="#cb25-241" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> g, <span class="at">n =</span> <span class="fu">length</span>(<span class="fu">intersect</span>(chosen_var, chosen_hedges_g)))</span>
+<span id="cb25-242"><a href="#cb25-242" aria-hidden="true" tabindex="-1"></a>  j <span class="ot">&lt;-</span> j <span class="sc">+</span> 1L</span>
+<span id="cb25-243"><a href="#cb25-243" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-244"><a href="#cb25-244" aria-hidden="true" tabindex="-1"></a>data_intersect <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, list_df)</span>
+<span id="cb25-245"><a href="#cb25-245" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data_intersect, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(group, <span class="sc">-</span>n), <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb25-246"><a href="#cb25-246" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb25-247"><a href="#cb25-247" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> n), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb25-248"><a href="#cb25-248" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>, <span class="at">y =</span> <span class="st">&quot;&quot;</span>) <span class="sc">+</span></span>
+<span id="cb25-249"><a href="#cb25-249" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(), <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb25-250"><a href="#cb25-250" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(), <span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb25-251"><a href="#cb25-251" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb25-252"><a href="#cb25-252" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-253"><a href="#cb25-253" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb25-254"><a href="#cb25-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-253"><a href="#cb25-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-254"><a href="#cb25-254" aria-hidden="true" tabindex="-1"></a><span class="in">```{r save-data}</span></span>
+<span id="cb25-255"><a href="#cb25-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-256"><a href="#cb25-256" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-257"><a href="#cb25-257" aria-hidden="true" tabindex="-1"></a></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
