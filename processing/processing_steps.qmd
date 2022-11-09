@@ -196,19 +196,6 @@ From @fig-missing_values_peptides and @fig-missing_values_proteins we can see
 that the missing values at peptide level are greater than that of protein level
 (as expected). This fact will guide our decision on the imputation technique.
 
-@fig-number_peptides shows the distribution of the number of peptides
-used to aggregate at the protein level. The figure shows that most of the proteins 
-are connected to 3-6 peptides.
-
-```{r r-vis-number-peptides}
-#| fig-width: 8
-#| label: fig-number_peptides
-#| fig-cap: Distribution of the peptide number matches with proteins. 
-plot(table(rowData(fts[["proteins"]])$.n), ylab = "Total")
-```
-
-
-
 # Processing steps {#sec-processing}
 
 Processing the raw data set is a crucial task when analyzing omics data.
@@ -216,17 +203,63 @@ Proteomics quantification data have technical variability due to experimental
 processes. Removing that variability and keeping only the biological variability 
 is fundamental for later downstream statistical analysis.
 
-It is important to mention that these processing steps are performed at the protein
-level, since as shown in @fig-missing_values_peptides and
+It is important to mention that these processing steps are performed at the
+protein level, since as shown in @fig-missing_values_peptides and
 @fig-missing_values_proteins, there are many missing values at the peptide
 level, which can affect proper corrections.
 Furthermore, the imputation and normalization are performed at $\log_2$
 transformed intensity.
 
+@tbl-steps_comparison summarizes the processing steps used in @Margalit2022
+and the alternative approach adopted in this project.
+
+```{r tbl-comparison}
+#| label: tbl-steps_comparison
+#| tbl-cap: Comparison between the processed steps.
+
+tab_steps_comparison <- dplyr::tibble(
+  "Steps" = c("Aggregation", "Filter", "Imputation", "Normalization"),
+  "Margalit et al. (2022)" = c("?", "?", "Sampling from empirical distribution",
+                               "Z-score"),
+  "Alternative" = c("Median", "Pct Missing $> 50%$ and Number peptides $<= 3$",
+                    "$k$-NN", "Faster cyclic loess"))
+
+kableExtra::kbl(x = tab_steps_comparison) |> 
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE)
+
+```
+
+
 ## Filtering
 
-First, we note that from @fig-ecdf_missing_values_proteins 50% of the proteins
-(total of 778) do not have any missing values in all samples.
+We start the processing step by filters out uninteresting proteins. We adopted
+two filter. First, proteins that have less or equal 3 peptides matched.
+Second, proteins with more than 50% of missing values across all samples.
+
+@fig-number_peptides shows the distribution of the number of peptides
+used to aggregate at the protein level. The figure shows that most of the
+proteins are matched to 3, 4, 5 or 6 peptides.
+Hence, proteins with less or equal than 3 matches peptides were exclude from
+the analysis. This means that 25\% out of `r nrow(fts[["proteins"]])`
+were excluded (see the red dot in @fig-number_peptides).
+
+
+```{r r-vis-number-peptides}
+#| fig-width: 8
+#| label: fig-number_peptides
+#| fig-cap: Distribution of the number of peptide per proteins.
+
+ggplot(data = data.frame(x = rowData(fts[["proteins"]])$.n), aes(x = x)) +
+  stat_ecdf() +
+  geom_point(data = data.frame(x = 3, y = mean(rowData(fts[["proteins"]])$.n <= 3)),
+             aes(x = x, y = y), col = "red", size = 4) +
+  geom_rug() +
+  labs(x = "Number of peptides per protein", y = "Cumulative probability") +
+  scale_x_continuous(breaks = scales::pretty_breaks(6))
+```
+
+Second, we note that from @fig-ecdf_missing_values_proteins that 50% of the
+proteins (total of 778) do not have any missing values in all samples.
 However, 21% of the proteins have more than 50% missing values across 
 all samples (see the red dot). Therefore, we will remove these above mentioned
 proteins.
@@ -244,13 +277,15 @@ ggplot(data = data.frame(x = na_proteins), aes(x = x)) +
   geom_rug() +
   labs(x = "Percentage of missing values", y = "Cumulative probability")
 
+# Filtering
 fts[["proteins"]] <- fts[["proteins"]][na_proteins < th, ]
+fts[["proteins"]] <- fts[["proteins"]][rowData(fts[["proteins"]])$.n > 3, ]
 ```
 
 ## Imputation
 
-The imputation of missing at random (MAR) values is widely discussed in both theory
-and real practice. In the context of label-free quantitative proteomics
+The imputation of missing at random (MAR) values is widely discussed in both
+theory and real practice. In the context of label-free quantitative proteomics
 data @Lazar2016 performed a series of imputation method comparisons using a
 simulated data set. The authors showed that overall the MAR-devoted methods,
 specifically _k_-NN, SVD, and MLE provided good performance for the imputation
