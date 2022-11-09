@@ -15,4 +15,4 @@ This page contains the following reports:
 
   - [Processing](processing/processing_steps.html)
   - [Feature selection](downstream_analysis/feature_selection.html)
-  - [Differential expression analysis](downstream_analysis/differential expression.html)
+  - [Differential expression analysis](downstream_analysis/differential_expression.html)
