@@ -29,11 +29,11 @@ theme_set(
 
 # Introduction {#sec-intro}
 
-This document performs two method of feature selection in order to reduce the
-number of proteins by selecting that ones with high biological variability.
-The first method is based on the decomposition of variance into technical and
-biological by nonparametric modeling the variance intensity as a function of
-mean intensity. The latter uses the Hedges'G effect size statistics.
+This document performs two methods of feature selection in order to reduce the
+number of proteins by selecting the ones with high biological variability.
+The first method is based on the decomposition of the variance into technical and
+biological by nonparametrically modeling the variance intensity as a function of
+mean intensity. The latter uses the Hedge's G effect size statistic.
 
 All the analysis considers the processed $\log_2$ intensity matrix performed
 in the processing steps described [here](processing/processing_steps.html).
@@ -47,9 +47,9 @@ fts <- readRDS("../data/fts_processed.rds")
 
 This approach fits a locally-weighted regression (LOWESS) between the
 mean-variance relationship of the $\log_2$ normalized intensity for all
-proteins, then subtract the variance of each proteins by their corresponding
-fitted values, the remaining values are called biological variability.
-The `modelGeneVar` function from `scran` package [@Aaron2016] is used.
+proteins. We then subtract the variance of each protein by their corresponding
+fitted values. The remaining values are called biological variability.
+The `modelGeneVar` function from the `scran` package [@Aaron2016] is used.
 
 
 ```{r model-protein-var}
@@ -79,9 +79,8 @@ plot_mean_variance <- function(dec) {
 plot_mean_variance(dec = dec)
 ```
 
-These two extreme proteins are listed below. Their , which
-could impact the fitted curve. Therefore, we will remove these cases from the
-analysis.
+These two extreme proteins are listed below. Their inclusion could impact 
+the fitted curve. Therefore, we will remove these cases from the analysis.
 
 ```{r remove-extreme-cases}
 chosen <- ((dec$mean < 22) | (dec$mean > 29))
@@ -92,9 +91,9 @@ assay(fts[["proteins"]][to_remove, ], "intensity")
 assay(fts[["proteins"]][to_remove, ], "log2_normalized")
 ```
 
-After removing the extreme cases we re-fit the mean-variance trend curve,
-the results are shown in @fig-mean_var_refitted. 
-Note that 49,63% of the 
+After removing the extreme cases we re-fit the mean-variance trend curve.
+The results are shown in @fig-mean_var_refitted. 
+Note that 49.63% of the 
 
 ```{r refitting}
 #| fig-width: 8
@@ -132,13 +131,28 @@ ggplot(dplyr::as_tibble(dec_2), aes(x = bio)) +
 ```
 
 
-# Effect size statistics {#sec-effect_size}
+# Effect size statistic {#sec-effect_size}
 
 For each comparison (Control vs Treatment) we can see which proteins are
-up-down regulated in the control and remove them from the treatment because
-it means that their expression are regulated by physiological gene expression.
-We use the Hedges' effect size statistic to do that. The statistics is defined
-as follows
+up/down regulated in the control and remove them from the treatment because
+it means that their expression is regulated by physiological gene expression.
+Typically, Cohen's D is used for effect size calculation, however was noted to
+be biased with regard to small sample sizes [@Bornstein2009]. To address this
+we convert Cohen's D to Hedge's G by applying a correction factor [@Hedges1981]. 
+The statistic is defined by
+
+$$ 
+G = J\,\dfrac{\bar{x}_T - \bar{x}_C}{\sqrt{\frac{{s_T^2 + s_C^2}}{2}}}
+$$
+where $\bar{x}_T$ and $\bar{x}_C$ are the mean of the treatment and
+control groups, $s_T^2$ and $s_C^2$ are the sample standard deviation of
+treatment and control groups, and $J \approx 1 - \frac{3}{(4\; (n_T + n_G) - 9}$
+is the correction factor,
+with $n_T$ and $n_G$ being the sample size of treatment and control groups.
+
+We use the `hedges_g` function from the `effectsize` package
+[@Ben-Shachar2020].
+
 
 ```{r effect-size}
 ampicillin <- apply(
@@ -167,8 +181,8 @@ if (all.equal(rownames(fts[["proteins"]]), rownames(effect_sizes)))
   rowData(fts[["proteins"]]) <- cbind(rowData(fts[["proteins"]]), effect_sizes)
 ```
 
-@fig-densities_hedges_g shows the density of the absolute value of Hedges'G
-statistics according to the treatment. 
+@fig-densities_hedges_g shows the density of the absolute values of the Hedge's G
+statistic according to the treatment. 
 
 ```{r densities-hedges-g}
 #| fig-width: 8
@@ -187,10 +201,10 @@ ggplot(pivotted_ef, aes(x = abs(value))) +
   scale_x_continuous(breaks = scales::pretty_breaks(8))
 ```
 
-After computing the Hedges'G statistic we have to consider a threshold to
+After computing the Hedge's G statistic we have to consider a threshold to
 filter the most variability proteins. We will consider 0.5 as the threshold,
 since this value means a moderate effect against the control.
-@fig-densities_hedges_g displays the total of proteins selected by group.
+@fig-densities_hedges_g displays the total number of proteins selected by group.
 
 ```{r checking}
 #| fig-width: 8
