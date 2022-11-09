@@ -1,6 +1,6 @@
 ---
 title: "Differential expression analysis"
-author: "André F. B. Menezes"
+author: "André F. B. Menezes, Beatrice Tropea, Cormac Monaghan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 toc: true
 number-sections: true
