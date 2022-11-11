@@ -47,14 +47,4 @@
   doi     = {10.2202/1544-6115.1027},
 }
 
-@Article{Margalit2022,
-  author  = {Anatte Margalit and James C. Carolan and Fiona Walsh},
-  title   = {Global protein responses of multidrug resistance plasmid-containing {E}scherichia coli to ampicillin, cefotaxime, imipenem and ciprofloxacin},
-  journal = {Journal of Global Antimicrobial Resistance},
-  year    = {2022},
-  volume  = {28},
-  pages   = {90--96},
-  doi     = {https://doi.org/10.1016/j.jgar.2021.12.006},
-}
-
 @Comment{jabref-meta: databaseType:bibtex;}

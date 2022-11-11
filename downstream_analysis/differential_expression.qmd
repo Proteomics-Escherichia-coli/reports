@@ -4,6 +4,7 @@ author: "André F. B. Menezes, Beatrice Tropea, Cormac Monaghan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 toc: true
 number-sections: true
+bibliography: references.bib
 format:
   html:
     html-math-method: katex
@@ -18,6 +19,7 @@ execute:
 ```{r pkg, include=FALSE}
 library(QFeatures)
 library(ggplot2)
+library(ggrepel)
 library(cowplot)
 theme_set(
   theme_cowplot() +
@@ -29,34 +31,194 @@ theme_set(
 
 # Introduction {#sec-intro}
 
-In this report we will perform a differential expression analysis of proteins
-with a biological relevance extracted. 
+In this report we will perform a differential expression analysis in order to
+find and ranking proteins in terms of evidence for differential expression (DE)
+between the control group and the treatments
+(Ampicillin, Cefotaxime, Impipenem, Ciprofloxacin).
+We also perform deep investigation of the estimated $\log_2$ fold-change
+between @Margalit2022 and the approached proposed.
+
+The plan of this report is as follows. @sec-alternative_approach provides a
+reviewed of moderated $t$-statistic proposed by @Smyth2004 and showed the
+obtained results. @sec-differences compares the difference in terms of 
+$\log_2$ fold-change and p-value between @Margalit2022 and the moderated
+$t$-statistic. A further investigation is presented in @sec-top_3_de, where
+the top 3 most DE proteins are examined.
+
+
 
 ```{r import-data}
 fts <- readRDS(file = "../data/fts_processed.rds")
 se_fiona <- readRDS("../data/se_processed.rds")
 ```
 
-# Limma
+# Linear model {#sec-alternative_approach}
 
-```{r de-analysis}
+To test for the differential expression of proteins @Margalit2022 used the
+pairwise Student-t test. It is well known that Student-t test has several
+drawbacks in small sample size, for instance provides high false discovery
+rates.
+In order to overcome this limitation we will use the moderated $t$-statistic
+introduced by @Smyth2004. This method was proposed in the context of microarray
+experiment, though it can be easily adapted for label-free MS/MS data, since
+the response variable, $\log_2$ normalized intensity usually can be well
+approximated by a Normal distribution.
+
+
+## The moderated $t$-statistic
+
+The moderated $t$-statistic is derived from a hierarchical linear model,
+defined by the existence of second order moments as follows
+
+$$
+\mathbb{E}(\mathbf{y}_{g}) = \mathbf{X}\,\boldsymbol{\alpha}_g
+$$
+and
+$$
+\mathrm{Var}(\mathbf{y}_{g}) = \mathbf{W}_g\,\sigma^2_g
+$$
+
+where $\mathbf{y}_{g} = (y_{g1}, \ldots, y_{gn})$ is the response variable 
+vector (usually $\log_2$ normalized intensity values) for the $g$th protein,
+$\mathbf{X}$ is a $p \times 1$ design matrix of full columns rank,
+$\boldsymbol{\alpha}_g = (\alpha_{g1}, \ldots, \alpha_{gp})$ is the coefficient
+vector,
+$\mathbf{W}_g$ is a known non-negative definite weight matrix, and
+$\sigma^2_g > 0$ is the common protein variance.
+
+Usually the design matrix contains dummies variables indicating which group
+the sample belongs. After the estimate $\boldsymbol{\alpha}_g$ the biological
+interest is to test hypothesis about certain contrast of
+$\boldsymbol{\alpha}_g$, without loss of generality we can defined the null
+hypothesis as follows
+$$
+\mathcal{H}_0: \boldsymbol{\beta}_g = \mathbf{0}
+$$
+where $\boldsymbol{\beta} = \mathbf{c}^\top \boldsymbol{\alpha}_g$.
+
+For example, the design matrix in this study is given by
+
+```{r print-design}
 # Creating the design matrix
 g <- factor(colData(fts)$group)
 g <- relevel(g, ref = "Control")
 design_matrix <- model.matrix(~ g)
 colnames(design_matrix) <- gsub("g", "", colnames(design_matrix))
+design_matrix
+```
 
+Observe that the Control group is taken as reference level. Therefore, a matrix
+contrast to test all pairwise comparison against the Control control is given
+by
+```{r}
+mat_contrast <- matrix(c(-1, 1, 0, 0, 0,
+                         -1, 0, 1, 0, 0,
+                         -1, 0, 0, 1, 0,
+                         -1, 0, 0, 0, 1),
+                       nrow = 4, byrow = TRUE)
+colnames(mat_contrast) <- c("Control", "Ampicillin", "Cefotaxime", "Impipenem",
+                            "Ciprofloxacin")
+rownames(mat_contrast) <- paste0("Contrast ", 1L:4L)
+mat_contrast
+```
+
+For each protein $g = 1,\ldots, k$ the linear model is fitted to get the 
+parameter estimators $\widehat{\mathbf{\alpha}}_g$,
+$\widehat{s}_g$ of $\sigma_g^2$ and the covariance matrices
+
+$$
+\mathrm{Var}(\boldsymbol{\alpha}_{g}) = \mathbf{V}_g\,s_g^2,
+$$
+and
+$$
+\mathrm{Var}(\boldsymbol{\beta}_{g}) = \mathbf{c}\,\mathbf{V}_g\,\mathbf{c}^\top\,s_g^2
+$$
+
+An important remark is that the response variable is not necessarily normally
+distributed and the parameters can be estimated with other method rather than
+ordinary least squares. Let $\beta_{jg}$ a specific $j$ contrast of protein 
+$g$, the distribution assumptions made by @Smyth2004 are in the estimators,
+i.e.,
+
+$$
+\begin{align}
+\widehat{\beta}_{gj}  \mid \beta_{gj}, \sigma^2_g &\sim N[\beta_{gj}, v_{gj}\,\sigma_g^2] \\
+s_g^2 \mid \sigma_g^2 &\sim \dfrac{\sigma_g^2}{d_g}\,\chi^2_{d_g}
+\end{align}
+$$
+where $v_{gj}$ is the $j$th diagonal element of
+$\mathbf{c}\,\mathbf{V}_g\,\mathbf{c}^\top$, $d_g$ is the residual degree of
+freedom for the linear model of protein $g$.
+
+Other interesting aspect developed by @Smyth2004 is the possibility of borrow
+information across proteins through use of prior information for the
+parameters $\beta_{gj}$ and $\sigma_g^2$.
+
+To describe how the variances are expected to vary across the proteins
+@Smyth2004 assumes the following prior distribution for $\sigma_g^2$
+
+$$
+\dfrac{1}{\sigma_g^2} \sim \dfrac{1}{d_0\,s_0^2}\chi^2_{d_0}
+$$
+with a prior sample variance $s_0^2$ and $d_0$ degrees of freedom.
+
+Important note that @Smyth2004 specify a conjugate prior for the sample
+variance $s^2_g$ given $\sigma^2_g$, which can be summarized as:
+
+$$
+\begin{align}
+(s^2_g \mid \sigma_g^2) &\sim \textrm{Gamma}\left[\dfrac{d_g}{2} , \dfrac{d_g}{2\,\sigma_g^2}\right] \\
+\dfrac{1}{\sigma^2_g} &\sim \textrm{Gamma}\left[\dfrac{d_0}{2} , \dfrac{d_0\,s_0^2}{2}\right]
+\end{align}
+$$
+where $X \sim \textrm{Gamma}(a, b)$ means gamma distribution with shape parameter
+$a$, rate parameter $b$ and expected values $\mathbb{E}(X) = \dfrac{a}{b}$. 
+
+Note that the $\mathbb{E}\left[\dfrac{1}{\sigma^2_g}\right] = \dfrac{1}{s_0^2}$.
+Also, note that the shape parameter is known, then this conjugate prior leads
+to the following posterior distribution
+
+$$
+\left(\dfrac{1}{\sigma_g^2}  \mid s^2_g \right) \sim \textrm{Gamma}\left[\dfrac{d_0 + d_g}{2} , \dfrac{d_0\,s_0^2 + d_g\,s_g^2}{2}\right]
+$$
+which has the following posterior mean:
+$$
+\mathbb{E}\left(\dfrac{1}{\sigma_g^2}  \mid s^2_g \right) = \dfrac{1}{\widetilde{s}^2_g}= \dfrac{d_0 + d_g}{d_0\,s_0^2 + d_g\,s_g^2}
+$$
+Hence, @Smyth2004 defined the moderated $t$-statistic for protein $g$ by
+
+$$
+\widetilde{t}_{gj} = \dfrac{\widehat{\beta}_{gj}}{\widetilde{s}_g\,\sqrt{v_{gi}}}
+$$
+where the posterior variance has replaced the usual sample variance of
+ordinary $t$-statistic.
+
+@Smyth2004 showed that under the null hypothesis the asymptotic distribution of 
+$\widetilde{t}_{gj}$ is t-Student with $d_g + d_0$ degrees of freedom.
+The additional degrees of freedom in $\widetilde{t}_{gj}$ reflects the extra
+information borrow between the proteins.
+
+From this point, the model assume that $d_0$ and $s_0^2$ are known. @Smyth2004
+proposes an empirical Bayes approach to estimate these parameters from the
+data. Particularly, $d_0$ and $s_0^2$ are estimated using the method of moments
+and the distribution of $s_g^2$, which is shown to follows a a scaled
+$F$-distribution.
+
+The moderated t-statistic is available in `limma` package throughout the
+`eBayes` function.
+
+```{r de-analysis}
 fit <- limma::lmFit(object = assay(fts[["proteins"]], "log2_normalized"),
                     design = design_matrix)
 fit <- limma::eBayes(fit)
 ampicillin <- limma::topTable(fit, coef = "Ampicillin", number = Inf,
-                              sort.by = "none", confint = TRUE)
+                              sort.by = "none", confint = FALSE)
 cefotaxime <- limma::topTable(fit, coef = "Cefotaxime", number = Inf,
-                              sort.by = "none", confint = TRUE)
+                              sort.by = "none", confint = FALSE)
 impipenem <- limma::topTable(fit, coef = "Impipenem", number = Inf,
-                             sort.by = "none", confint = TRUE)
+                             sort.by = "none", confint = FALSE)
 ciprofloxacin <- limma::topTable(fit, coef = "Ciprofloxacin", number = Inf,
-                                 sort.by = "none", confint = TRUE)
+                                 sort.by = "none", confint = FALSE)
 
 # Appending
 data_de_limma <- dplyr::bind_rows(
@@ -118,11 +280,71 @@ data_de_pivotted <- data_de |>
   dplyr::mutate(diff_log_fc = abs(log_fc_student_t) - abs(log_fc_limma),
                 diff_p_value = p_value_student_t - p_value_limma,
                 diff_rank = rank_pvalue_student_t - rank_pvalue_limma)
-
 ```
 
 
-# Comparing the differences
+## Volcano plots
+
+```{r volcano-plot-function, include=FALSE}
+volcano_plot <- function(data, cutoff_logfc = 0.5,
+                         cutoff_pvalue = 0.005, top_de = 10) {
+  data_labelled <- data |> 
+    dplyr::filter(abs(log_fc) >= cutoff_logfc, p_value <= cutoff_pvalue) |> 
+    dplyr::arrange(-abs(log_fc)) |> 
+    head(top_de)
+  p <- ggplot(data, aes(x = log_fc, y = -log10(p_value))) +
+    geom_point(size = 2, shape = 21, col = "black", fill = "grey69") +
+    geom_point(data = data_labelled, shape = 21, size = 2, fill = "red",
+               colour = "black") +
+    geom_text_repel(data = data_labelled, aes(label = protein), size = 4,
+                    color = "black") +
+    geom_vline(xintercept = c(-cutoff_logfc, cutoff_logfc), linetype = "dashed",
+               col = "black") +
+    geom_hline(yintercept = -log10(cutoff_pvalue), linetype = "dashed",
+               col = "black") +
+    labs(x = expression("log"[2]*"FC"), y = expression("-log"[10]*"p-value")) +
+    scale_x_continuous(breaks = scales::pretty_breaks(8)) +
+    scale_y_continuous(breaks = scales::pretty_breaks(6))
+    
+  p
+}
+```
+
+@fig-volcano-plot-ampicillin, @fig-volcano-plot-cefotaxime,
+@fig-volcano-plot-impipenem and @fig-volcano-plot-ciprofloxacin show the
+volcano plots obtained from moderated $t$-statistics for Control versus
+Ampicillin, Cefotaxime, Impipenem, and Ciprofloxacin, respectively.
+The cutoffs used for the p-value and the $\log_2$ fold-change were
+0.005 and 0.5, respectively. We also colored in red and labelled the top 10
+proteins ranked by the $\log_2$ fold-change.
+
+
+```{r vp-ampicillin, fig.width=8}
+#| label: fig-volcano-plot-ampicillin
+#| fig-cap: Volcano plot for Control versus Ampicillin
+volcano_plot(data = dplyr::filter(data_de_limma, group == "Ampicillin"))
+```
+
+```{r vp-cefotaxime, fig.width=8}
+#| label: fig-volcano-plot-cefotaxime
+#| fig-cap: Volcano plot for Control versus Cefotaxime
+volcano_plot(data = dplyr::filter(data_de_limma, group == "Cefotaxime"))
+```
+
+```{r vp-impipenem, fig.width=8}
+#| label: fig-volcano-plot-impipenem
+#| fig-cap: Volcano plot for Control versus Impipenem
+volcano_plot(data = dplyr::filter(data_de_limma, group == "Impipenem"))
+```
+
+```{r vp-ciprofloxacin, fig.width=8}
+#| label: fig-volcano-plot-ciprofloxacin
+#| fig-cap: Volcano plot for Control versus Ciprofloxacin
+volcano_plot(data = dplyr::filter(data_de_limma, group == "Ciprofloxacin"))
+```
+
+
+# Comparing the differences {#sec-differences}
 
 ```{r tbl-pct-diff}
 #| label: tbl-pct_diff
@@ -186,7 +408,7 @@ data_de |>
 ```
 
 
-# The top 3 most DE proteins
+# The top 3 most DE proteins {#sec-top_3_de}
 
 
 ## Comparing
@@ -269,7 +491,7 @@ de_proteins <- do.call(rbind, list_de)
 
 
 
-## Investigating the raw intensity distribution
+## The intensity distribution
 
 ```{r investigate, results="asis", fig.height=8}
 col_data <- dplyr::as_tibble(colData(fts)) |> 
