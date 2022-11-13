@@ -32,14 +32,14 @@ theme_set(
 # Introduction {#sec-intro}
 
 In this report we will perform a differential expression analysis in order to
-find and ranking proteins in terms of evidence for differential expression (DE)
-between the control group and the treatments
+find and rank proteins showing evidence of differential expression (DE)
+between the control group and the  various treatments
 (Ampicillin, Cefotaxime, Impipenem, Ciprofloxacin).
-We also perform deep investigation of the estimated $\log_2$ fold-change
-between @Margalit2022 and the approached proposed.
+We will also perform a deep investigation of the estimated $\log_2$ fold-change
+between @Margalit2022 and the proposed approach.
 
-The plan of this report is as follows. @sec-alternative_approach provides a
-reviewed of moderated $t$-statistic proposed by @Smyth2004 and showed the
+The plan of this report is as followed. @sec-alternative_approach provides a
+review of the moderated $t$-statistic proposed by @Smyth2004 and shows the
 obtained results. @sec-differences compares the difference in terms of 
 $\log_2$ fold-change and p-value between @Margalit2022 and the moderated
 $t$-statistic. A further investigation is presented in @sec-top_3_de, where
@@ -54,14 +54,14 @@ se_fiona <- readRDS("../data/se_processed.rds")
 
 # Linear model {#sec-alternative_approach}
 
-To test for the differential expression of proteins @Margalit2022 used the
-pairwise Student-t test. It is well known that Student-t test has several
-drawbacks in small sample size, for instance provides high false discovery
-rates.
+To test for the differential expression of proteins, @Margalit2022 used a
+pairwise Student-t test. It is well known that Student-t tests have several
+drawbacks in small sample sizes (for instance providing high false discovery
+rates).
 In order to overcome this limitation we will use the moderated $t$-statistic
 introduced by @Smyth2004. This method was proposed in the context of microarray
-experiment, though it can be easily adapted for label-free MS/MS data, since
-the response variable, $\log_2$ normalized intensity usually can be well
+experiments, although it can be easily adapted for label-free MS/MS data, since
+the response variable, $\log_2$ normalized intensity, can usually be well
 approximated by a Normal distribution.
 
 
@@ -88,8 +88,8 @@ $\sigma^2_g > 0$ is the common protein variance.
 
 Usually the design matrix contains dummies variables indicating which group
 the sample belongs. After the estimate $\boldsymbol{\alpha}_g$ the biological
-interest is to test hypothesis about certain contrast of
-$\boldsymbol{\alpha}_g$, without loss of generality we can defined the null
+interest is to test hypotheses about certain contrasts of
+$\boldsymbol{\alpha}_g$, without loss of generality we can define the null
 hypothesis as follows
 $$
 \mathcal{H}_0: \boldsymbol{\beta}_g = \mathbf{0}
@@ -107,8 +107,8 @@ colnames(design_matrix) <- gsub("g", "", colnames(design_matrix))
 design_matrix
 ```
 
-Observe that the Control group is taken as reference level. Therefore, a matrix
-contrast to test all pairwise comparison against the Control control is given
+Note that the Control group is set as the reference level. Therefore, a contrast 
+matrix to test all pairwise comparison against the Control control is given
 by
 ```{r}
 mat_contrast <- matrix(c(-1, 1, 0, 0, 0,
@@ -124,7 +124,7 @@ mat_contrast
 
 For each protein $g = 1,\ldots, k$ the linear model is fitted to get the 
 parameter estimators $\widehat{\mathbf{\alpha}}_g$,
-$\widehat{s}_g$ of $\sigma_g^2$ and the covariance matrices
+$\widehat{s}_g$ of $\sigma_g^2$, and the covariance matrices
 
 $$
 \mathrm{Var}(\boldsymbol{\alpha}_{g}) = \mathbf{V}_g\,s_g^2,
@@ -135,7 +135,7 @@ $$
 $$
 
 An important remark is that the response variable is not necessarily normally
-distributed and the parameters can be estimated with other method rather than
+distributed and the parameters can be estimated with other methods rather than
 ordinary least squares. Let $\beta_{jg}$ a specific $j$ contrast of protein 
 $g$, the distribution assumptions made by @Smyth2004 are in the estimators,
 i.e.,
@@ -147,10 +147,10 @@ s_g^2 \mid \sigma_g^2 &\sim \dfrac{\sigma_g^2}{d_g}\,\chi^2_{d_g}
 \end{align}
 $$
 where $v_{gj}$ is the $j$th diagonal element of
-$\mathbf{c}\,\mathbf{V}_g\,\mathbf{c}^\top$, $d_g$ is the residual degree of
+$\mathbf{c}\,\mathbf{V}_g\,\mathbf{c}^\top$, and $d_g$ is the residual degree of
 freedom for the linear model of protein $g$.
 
-Other interesting aspect developed by @Smyth2004 is the possibility of borrow
+Another interesting aspect developed by @Smyth2004 is the possibility of borrowing
 information across proteins through use of prior information for the
 parameters $\beta_{gj}$ and $\sigma_g^2$.
 
@@ -162,7 +162,7 @@ $$
 $$
 with a prior sample variance $s_0^2$ and $d_0$ degrees of freedom.
 
-Important note that @Smyth2004 specify a conjugate prior for the sample
+An important note is that @Smyth2004 specified a conjugate prior for the sample
 variance $s^2_g$ given $\sigma^2_g$, which can be summarized as:
 
 $$
@@ -171,11 +171,11 @@ $$
 \dfrac{1}{\sigma^2_g} &\sim \textrm{Gamma}\left[\dfrac{d_0}{2} , \dfrac{d_0\,s_0^2}{2}\right]
 \end{align}
 $$
-where $X \sim \textrm{Gamma}(a, b)$ means gamma distribution with shape parameter
-$a$, rate parameter $b$ and expected values $\mathbb{E}(X) = \dfrac{a}{b}$. 
+where $X \sim \textrm{Gamma}(a, b)$ means a gamma distribution with shape parameter
+$a$, rate parameter $b$, and expected values $\mathbb{E}(X) = \dfrac{a}{b}$. 
 
 Note that the $\mathbb{E}\left[\dfrac{1}{\sigma^2_g}\right] = \dfrac{1}{s_0^2}$.
-Also, note that the shape parameter is known, then this conjugate prior leads
+Also, note that since the shape parameter is known, the conjugate prior leads
 to the following posterior distribution
 
 $$
@@ -204,7 +204,7 @@ data. Particularly, $d_0$ and $s_0^2$ are estimated using the method of moments
 and the distribution of $s_g^2$, which is shown to follows a a scaled
 $F$-distribution.
 
-The moderated t-statistic is available in `limma` package throughout the
+The moderated t-statistic is available in the `limma` package throughout the
 `eBayes` function.
 
 ```{r de-analysis}
@@ -311,12 +311,12 @@ volcano_plot <- function(data, cutoff_logfc = 0.5,
 ```
 
 @fig-volcano-plot-ampicillin, @fig-volcano-plot-cefotaxime,
-@fig-volcano-plot-impipenem and @fig-volcano-plot-ciprofloxacin show the
-volcano plots obtained from moderated $t$-statistics for Control versus
+@fig-volcano-plot-impipenem, and @fig-volcano-plot-ciprofloxacin show the
+volcano plots obtained from using the moderated $t$-statistics for Control versus
 Ampicillin, Cefotaxime, Impipenem, and Ciprofloxacin, respectively.
 The cutoffs used for the p-value and the $\log_2$ fold-change were
-0.005 and 0.5, respectively. We also colored in red and labelled the top 10
-proteins ranked by the $\log_2$ fold-change.
+0.005 and 0.5, respectively. We also lebelled and highlighted (in red) the top 10
+differntially expressed proteins ranked by the $\log_2$ fold-change.
 
 
 ```{r vp-ampicillin, fig.width=8}
