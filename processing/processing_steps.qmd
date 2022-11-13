@@ -35,8 +35,8 @@ label-free proteomics of _Escherichia_ _coli_ cultures bacterial data.
 This data was first analyzed by @Margalit2022.
 
 The report is organized as followed. @sec-data describes data import and management
-using the QFeatures package. Processing steps, namely filtering, imputation, and
-normalization are discussed in @sec-processing.
+using the QFeatures package. Processing steps (filtering, imputation, and
+normalization) are discussed in @sec-processing.
 Finally, @sec-comparison presents a comparison between the processed data from
 the original paper and from the steps performed below.
 
@@ -175,9 +175,7 @@ naniar::vis_miss(data_)
 ```
 
 Now, we will aggregate at protein level by computing the median and examining
-the distribution of missing values. The percentage of missing values at
-protein level is
-`r paste0(round(100 * mean(is.na(assay(fts[["proteins"]]))), 2), "%")`.
+the distribution of missing values.
 
 ```{r vis-miss-proteins}
 #| fig-height: 8
@@ -192,6 +190,8 @@ colnames(data_) <- fts$sample_names
 naniar::vis_miss(data_)
 ```
 
+Note, that the percentage of missing values at protein level is
+`r paste0(round(100 * mean(is.na(assay(fts[["proteins"]]))), 2), "%")`.
 From @fig-missing_values_peptides and @fig-missing_values_proteins we can see 
 that the missing values at peptide level are greater than that of protein level
 (as expected). This fact will guide our decision on the imputation technique.
@@ -210,7 +210,7 @@ level, which can affect proper corrections.
 Furthermore, the imputation and normalization are performed at $\log_2$
 transformed intensity.
 
-@tbl-steps_comparison summarizes the processing steps used in @Margalit2022
+@tbl-steps_comparison summarizes the processing steps used by @Margalit2022
 and the alternative approach adopted in this project.
 
 ```{r tbl-comparison}
@@ -232,14 +232,15 @@ kableExtra::kbl(x = tab_steps_comparison) |>
 
 ## Filtering
 
-We start the processing step by filters out uninteresting proteins. We adopted
-two filter. First, proteins that have less or equal 3 peptides matched.
-Second, proteins with more than 50% of missing values across all samples.
+We start the processing step by filtering out uninteresting proteins, adopting 
+two filters to do so. First, we filter proteins that have less than or equal 
+to 3 peptides matches, and secondly, we filter proteins with more than 50% 
+missing values across all samples.
 
 @fig-number_peptides shows the distribution of the number of peptides
 used to aggregate at the protein level. The figure shows that most of the
-proteins are matched to 3, 4, 5 or 6 peptides.
-Hence, proteins with less or equal than 3 matches peptides were exclude from
+proteins are matched to 3, 4, 5, or 6 peptides.
+Hence, proteins with less than or equal to 3 matches peptides were exclude from
 the analysis. This means that 25\% out of `r nrow(fts[["proteins"]])`
 were excluded (see the red dot in @fig-number_peptides).
 
