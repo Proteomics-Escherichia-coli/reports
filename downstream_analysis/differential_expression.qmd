@@ -555,6 +555,9 @@ for (g in groups) {
 }
 ```
 
+```{r export, include=FALSE}
+write.csv(x = data_de, file = "../data/de_proteins.csv", row.names = FALSE)
+```
 
 
 

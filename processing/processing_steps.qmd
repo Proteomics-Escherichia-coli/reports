@@ -212,6 +212,9 @@ transformed intensity.
 
 @tbl-steps_comparison summarizes the processing steps used in @Margalit2022
 and the alternative approach adopted in this project.
+The imputation was performed by sampling from a Normal distribution with
+downshift of 1.8 times the mean standard deviation (SD) of all measured values
+and a width of 0.3 times this SD.
 
 ```{r tbl-comparison}
 #| label: tbl-steps_comparison
@@ -219,7 +222,7 @@ and the alternative approach adopted in this project.
 
 tab_steps_comparison <- dplyr::tibble(
   "Steps" = c("Aggregation", "Filter", "Imputation", "Normalization"),
-  "Margalit et al. (2022)" = c("?", "?", "Sampling from empirical distribution",
+  "Margalit et al. (2022)" = c("?", "?", "Sampling from Normal distribution",
                                "Z-score"),
   "Alternative" = c("Median", "Pct Missing $> 50%$ and Number peptides $<= 3$",
                     "$k$-NN", "Faster cyclic loess"))
@@ -286,10 +289,17 @@ fts[["proteins"]] <- fts[["proteins"]][rowData(fts[["proteins"]])$.n > 3, ]
 
 The imputation of missing at random (MAR) values is widely discussed in both
 theory and real practice. In the context of label-free quantitative proteomics
-data @Lazar2016 performed a series of imputation method comparisons using a
-simulated data set. The authors showed that overall the MAR-devoted methods,
-specifically _k_-NN, SVD, and MLE provided good performance for the imputation
-task.
+data @Lazar2016 performed a series of imputation method comparisons using
+simulated and read data set. The authors showed that overall the MAR-devoted
+methods, specifically _k_-NN, SVD, and MLE provided good performance for the
+imputation task.
+
+As mentioned the imputation technique used by Perseus is sampling from a 
+Normal distribution with shifts in the mean and variance that mimic low
+undetected intensities, therefore the missing values are filled by low values.
+This imputed method could lead to an inflation in the variance producing
+differences that would not appear. 
+
 
 In this study, we consider the _k_-NN method implemented in the Bioconductor
 R package `impute` [@Hastie2022]. For each protein abundance, $x_i$ the method
