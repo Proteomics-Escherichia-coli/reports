@@ -30,7 +30,7 @@ theme_set(
 # Introduction {#sec-intro}
 
 This document performs two methods of feature selection in order to reduce the
-number of proteins by selecting the ones with high biological variability.
+number of proteins by selecting only the ones with high biological variability.
 The first method is based on the decomposition of the variance into technical and
 biological by nonparametrically modeling the variance intensity as a function of
 mean intensity. The latter uses the Hedge's G effect size statistic.
@@ -145,10 +145,11 @@ $$
 G = J\,\dfrac{\bar{x}_T - \bar{x}_C}{\sqrt{\frac{{s_T^2 + s_C^2}}{2}}}
 $$
 where $\bar{x}_T$ and $\bar{x}_C$ are the mean of the treatment and
-control groups, $s_T^2$ and $s_C^2$ are the sample standard deviation of
-treatment and control groups, and $J \approx 1 - \frac{3}{(4\; (n_T + n_G) - 9}$
+control groups, $s_T^2$ and $s_C^2$ are the sample standard deviations of each
+respective group (treatment and control), and $J \approx 1 - \frac{3}{(4\; (n_T + n_G) - 9}$
 is the correction factor,
-with $n_T$ and $n_G$ being the sample size of treatment and control groups.
+with $n_T$ and $n_G$ being the sample size of each respective group 
+(treatment and control).
 
 We use the `hedges_g` function from the `effectsize` package
 [@Ben-Shachar2020].
